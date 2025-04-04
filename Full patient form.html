@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Information Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      padding: 30px;
+      color: #2c3e50;
+      margin: 0;
+    }
+    h1 {
+      color: #ffffff;
+      background: #2c3e50;
+      padding: 15px 25px;
+      border-radius: 10px 10px 0 0;
+      margin: 0;
+      text-align: center;
+      font-size: 1.8em;
+    }
+    .dashboard {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .section {
+      margin: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+    }
+    .section:hover {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+    .section h3 {
+      color: #ffffff;
+      background: linear-gradient(90deg, #3498db, #2980b9);
+      padding: 10px 15px;
+      margin: -20px -20px 20px -20px;
+      border-radius: 10px 10px 0 0;
+      font-size: 1.3em;
+    }
+    .section h4 {
+      color: #34495e;
+      margin: 15px 0 10px;
+      font-size: 1.1em;
+    }
+    .personal-info { background: #eef7ff; flex: 1; }
+    .measurements { background: #e6fff5; flex: 1; }
+    .clinical-history { background: #f9f2ff; }
+    .monitoring { background: #fff5e6; }
+    
+    label {
+      display: flex;
+      flex-direction: column;
+      margin: 15px 0;
+      font-weight: 600;
+      color: #34495e;
+    }
+    input, select, textarea {
+      width: 100%;
+      max-width: 350px;
+      padding: 10px;
+      border: 2px solid #bdc3c7;
+      border-radius: 6px;
+      font-size: 1em;
+      background: #fff;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    #chief-complaint { max-width: 200px; min-height: 50px; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    textarea {
+      max-width: 600px;
+      min-height: 100px;
+      resize: vertical;
+    }
+    .row {
+      display: flex;
+      gap: 15px;
+      margin: 10px 0;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .row input, .row select { max-width: 150px; }
+    button {
+      background: linear-gradient(90deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s ease;
+      margin: 5px 0;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #2980b9, #1b6ca8);
+      transform: translateY(-1px);
+    }
+    .remove-btn {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      padding: 6px 12px;
+      font-size: 0.9em;
+    }
+    .remove-btn:hover {
+      background: linear-gradient(90deg, #c0392b, #a93226);
+    }
+    .submit-btn {
+      background: linear-gradient(90deg, #27ae60, #219653);
+      padding: 12px 30px;
+      font-size: 1.1em;
+      margin: 30px auto;
+      display: block;
+    }
+    .submit-btn:hover {
+      background: linear-gradient(90deg, #219653, #1b7744);
+    }
+    .output {
+      margin: 30px 25px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      border-left: 5px solid #3498db;
+    }
+    .output h2 {
+      color: #2c3e50;
+      font-size: 1.5em;
+      margin-top: 0;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    .output p {
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+    #notes-rows textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #bdc3c7;
+      border-radius: 6px;
+      font-size: 1em;
+      background: #fff;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    #notes-rows label {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1>Patient Information Dashboard</h1>
+
+    <div class="top-row">
+      <!-- Personal Information -->
+      <div class="section personal-info">
+        <h3>Personal Information</h3>
+        <label>Name: <input type="text" id="patient-name"></label>
+        <label>Date of Birth: <input type="date" id="dob"></label>
+        <label>Age: <span id="calculated-age">Not calculated</span></label>
+        <label>Gender: 
+          <select id="gender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>Preferred Pronouns: 
+          <select id="pronouns">
+            <option value="he/him">He/Him</option>
+            <option value="she/her">She/Her</option>
+            <option value="they/them">They/Them</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Measurements -->
+      <div class="section measurements">
+        <h3>Measurements</h3>
+        <label>Weight: 
+          <input type="number" id="weight">
+          <select id="weight-unit">
+            <option value="kg">Kg</option>
+            <option value="lb">Lb</option>
+          </select>
+        </label>
+        <label>Height: 
+          <input type="number" id="height-val">
+          <select id="height-unit">
+            <option value="cm">cm</option>
+            <option value="inches">inches</option>
+            <option value="ft-in">feet & inches</option>
+          </select>
+          <div id="ft-in-inputs" style="display: none;">
+            <input type="number" id="feet" placeholder="Feet">
+            <input type="number" id="inches" placeholder="Inches">
+          </div>
+        </label>
+        <label>Serum Creatinine (mg/dL): <input type="number" step="0.01" id="scr"></label>
+      </div>
+    </div>
+
+    <!-- Clinical History -->
+    <div class="section clinical-history">
+      <h3>Clinical History</h3>
+      <label>Chief Complaint: <textarea id="chief-complaint" rows="2"></textarea></label>
+      <label>Symptoms: <textarea id="symptoms" rows="2"></textarea></label>
+      <label>Duration of Symptoms: <textarea id="duration-symptoms" rows="2"></textarea></label>
+      <label>PMH: <textarea id="pmh" rows="4" placeholder="Enter past medical history"></textarea></label>
+      <label>HPI & PMH: <textarea id="hpi-pmh" rows="4"></textarea></label>
+    </div>
+
+    <!-- SH and Pertinent Lifestyle -->
+    <div class="section clinical-history">
+      <h3>SH and Pertinent Lifestyle</h3>
+      <button onclick="toggleMentalHealthForm()">Add Mental Health Details</button>
+      <div id="mental-health-form" style="display: none; margin-top: 15px;">
+        <h4>How would you rate your current mental and emotional health?</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="mental-health" value="excellent"> Excellent</label>
+          <label><input type="checkbox" name="mental-health" value="good"> Good</label>
+          <label><input type="checkbox" name="mental-health" value="fair"> Fair</label>
+          <label><input type="checkbox" name="mental-health" value="poor"> Poor</label>
+        </div>
+        <h4>Have you recently experienced any of the following? (Select all that apply)</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="mental-symptoms" value="depressed"> Feeling down, depressed, or hopeless</label>
+          <label><input type="checkbox" name="mental-symptoms" value="lost-interest"> Loss of interest or pleasure in usual activities</label>
+          <label><input type="checkbox" name="mental-symptoms" value="anxious"> Feeling anxious or on edge</label>
+          <label><input type="checkbox" name="mental-symptoms" value="worry-control"> Trouble controlling worry</label>
+          <label><input type="checkbox" name="mental-symptoms" value="sleep-trouble"> Trouble falling or staying asleep</label>
+          <label><input type="checkbox" name="mental-symptoms" value="counselling"> Receiving counselling</label>
+          <label><input type="checkbox" name="mental-symptoms" value="none"> None of the above</label>
+        </div>
+        <label>Number of sleeping hours: <input type="number" id="sleep-hours" min="0" max="24"></label>
+      </div>
+
+      <button onclick="toggleSmokingForm()">Add Smoking Details</button>
+      <div id="smoking-form" style="display: none; margin-top: 15px;">
+        <label>Smoking Status:
+          <select id="smoking-status" onchange="toggleSmokingDetails()">
+            <option value="">Select</option>
+            <option value="smoker">Smoker</option>
+            <option value="ex-smoker">Ex-Smoker</option>
+            <option value="never">Never Smoked</option>
+          </select>
+        </label>
+        <div id="smoker-details" style="display: none;">
+          <label>Number of cigarettes daily: <input type="number" id="cigarettes-daily" min="0"></label>
+          <label>How long have you been smoking? <input type="number" id="smoking-years" min="0" placeholder="Years"></label>
+        </div>
+        <div id="ex-smoker-details" style="display: none;">
+          <label>How long have you quit smoking? <input type="text" id="quit-duration" placeholder="e.g., 2 years"></label>
+        </div>
+      </div>
+
+      <button onclick="toggleMaritalStatusForm()">Add Marital Status Details</button>
+      <div id="marital-status-form" style="display: none; margin-top: 15px;">
+        <label>Marital Status:
+          <select id="marital-status">
+            <option value="">Select</option>
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+            <option value="divorced">Divorced</option>
+            <option value="widowed">Widowed</option>
+            <option value="partnered">Partnered</option>
+            <option value="separated">Separated</option>
+          </select>
+        </label>
+        <label>Living Situation:</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="living-situation" value="alone"> Alone</label>
+          <label><input type="checkbox" name="living-situation" value="spouse"> Spouse</label>
+          <label><input type="checkbox" name="living-situation" value="family"> Family</label>
+          <label><input type="checkbox" name="living-situation" value="else" onchange="toggleLivingElse()"> Else</label>
+          <input type="text" id="living-else" placeholder="Specify" style="display: none;">
+        </div>
+        <label>Number of Children: <input type="number" id="children" min="0" placeholder="e.g., 2"></label>
+      </div>
+
+      <button onclick="toggleSubstancesForm()">Add Recreational Substances and Alcohol Details</button>
+      <div id="substances-form" style="display: none; margin-top: 15px;">
+        <label>Do you drink alcohol?
+          <select id="alcohol-use" onchange="toggleAlcoholRows()">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <div id="alc-rows" style="display: none;">
+          <div class="row">
+            <input type="text" placeholder="Alcohol Type (e.g., Beer)" class="alc-type">
+            <input type="number" placeholder="Number" class="alc-amount">
+            <select class="alc-unit">
+              <option value="glasses">Glasses</option>
+              <option value="cups">Cups</option>
+            </select>
+            <input type="text" placeholder="Frequency (e.g., daily)" class="alc-frequency" list="frequency-options">
+            <datalist id="frequency-options">
+              <option value="daily">
+              <option value="weekly">
+              <option value="occasionally">
+            </datalist>
+            <button class="remove-btn" onclick="removeRow(this)">X</button>
+          </div>
+        </div>
+        <button onclick="addRow('alc')" style="display: none;" id="add-alcohol-btn">Add Alcohol Entry</button>
+
+        <label>Do you use recreational substances?
+          <select id="substances-use" onchange="toggleSubstanceRows()">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <div id="sub-rows" style="display: none;">
+          <div class="row">
+            <input type="text" placeholder="Substance Name" class="sub-name">
+            <button class="remove-btn" onclick="removeRow(this)">X</button>
+          </div>
+        </div>
+        <button onclick="addRow('sub')" style="display: none;" id="add-substance-btn">Add Substance Entry</button>
+      </div>
+
+      <label>Summary: <textarea id="social-history-summary" rows="4" placeholder="This will auto-update based on inputs above."></textarea></label>
+    </div>
+
+    <!-- Eating Habits -->
+    <div class="section clinical-history">
+      <h3>Eating Habits</h3>
+      <div style="margin-top: 15px;">
+        <h4>Meal Regularity</h4>
+        <label>How many meals do you usually eat per day?
+          <input type="number" id="meals-per-day" min="0">
+        </label>
+        <label>Do you skip meals frequently?
+          <select id="skip-meals">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+
+        <h4>Meal Composition</h4>
+        <label>How would you describe your typical meals?</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="meal-comp" value="balanced"> Balanced</label>
+          <label><input type="checkbox" name="meal-comp" value="high-carb"> High in carbs</label>
+          <label><input type="checkbox" name="meal-comp" value="high-fat"> High in fat</label>
+          <label><input type="checkbox" name="meal-comp" value="high-sugar"> High in sugar</label>
+          <label><input type="checkbox" name="meal-comp" value="low-fruit-veg"> Low in fruits/veg</label>
+          <label><input type="checkbox" name="meal-comp" value="vegetarian"> Vegetarian/Vegan</label>
+          <label><input type="checkbox" name="meal-comp" value="processed"> High in processed foods</label>
+          <label><input type="checkbox" name="meal-comp" value="special-diet" onchange="toggleSpecialDiet()"> Special diet</label>
+         A<input type="text" id="special-diet-text" placeholder="Specify" style="display: none;">
+        </div>
+
+        <h4>Appetite & Weight Changes</h4>
+        <label>Any change in your weight or appetite?
+          <select id="weight-appetite-change" onchange="toggleAppetiteQuestion()">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <div id="appetite-question" style="display: none;">
+          <label>How is your current appetite?
+            <select id="appetite">
+              <option value="">Select</option>
+              <option value="good">Good</option>
+              <option value="normal">Normal</option>
+              <option value="poor">Poor</option>
+              <option value="increased">Increased</option>
+            </select>
+          </label>
+        </div>
+
+        <h4>Fluid & Caffeine Consumption</h4>
+        <label>How much fluid do you usually drink in a day?</label>
+        <div class="row">
+          <input type="number" id="fluid-amount-num" min="0" placeholder="Number">
+          <select id="fluid-unit">
+            <option value="cups">cups</option>
+            <option value="Glasses">Glasses</option>
+            <option value="OZ">OZ</option>
+            <option value="ml">ml</option>
+          </select>
+        </div>
+        <label>What types of fluids do you mostly drink?</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="fluid-type" value="water"> Water</label>
+          <label><input type="checkbox" name="fluid-type" value="juice"> Juice</label>
+          <label><input type="checkbox" name="fluid-type" value="soda"> Soda</label>
+          <label><input type="checkbox" name="fluid-type" value="sports"> Sports drinks</label>
+          <label><input type="checkbox" name="fluid-type" value="milk"> Milk/Dairy</label>
+        </div>
+        <label>Do you consume caffeine regularly?
+          <select id="caffeine-use" onchange="toggleCaffeineDetails()">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <div id="caffeine-details" style="display: none;">
+          <label>Type(s):</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <label><input type="checkbox" name="caffeine-type" value="coffee" onchange="toggleCaffeineAmount()"> Coffee</label>
+            <label><input type="checkbox" name="caffeine-type" value="tea" onchange="toggleCaffeineAmount()"> Tea</label>
+            <label><input type="checkbox" name="caffeine-type" value="energy" onchange="toggleCaffeineAmount()"> Energy drinks</label>
+            <label><input type="checkbox" name="caffeine-type" value="soda" onchange="toggleCaffeineAmount()"> Soda</label>
+            <label><input type="checkbox" name="caffeine-type" value="other" onchange="toggleCaffeineAmount()"> Other</label>
+          </div>
+          <div id="caffeine-amount-section" style="display: none;">
+            <label>Amount per day:</label>
+            <div class="row">
+              <input type="number" id="caffeine-amount-num" min="0" placeholder="Number">
+              <select id="caffeine-unit">
+                <option value="cups">cups</option>
+                <option value="OZ">OZ</option>
+                <option value="ml">ml</option>
+              </select>
+            </div>
+          </div>
+          <label>Do you experience caffeine-related symptoms?</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <label><input type="checkbox" name="caffeine-symptom" value="sleep"> Trouble sleeping</label>
+            <label><input type="checkbox" name="caffeine-symptom" value="restless"> Restlessness</label>
+            <label><input type="checkbox" name="caffeine-symptom" value="palpitations"> Palpitations</label>
+            <label><input type="checkbox" name="caffeine-symptom" value="irritable"> Irritability</label>
+          </div>
+        </div>
+        <label>Summary: <textarea id="eating-habits-summary" rows="4" placeholder="This will auto-update based on inputs above."></textarea></label>
+      </div>
+    </div>
+
+    <!-- Physical Activity -->
+    <div class="section clinical-history">
+      <h3>Physical Activity</h3>
+      <label>Do you engage in physical activity?</label>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <label><input type="checkbox" name="physical-frequency" value="daily" onchange="togglePhysicalDetails()"> Daily</label>
+        <label><input type="checkbox" name="physical-frequency" value="few-times-week" onchange="togglePhysicalDetails()"> A few times per week</label>
+        <label><input type="checkbox" name="physical-frequency" value="rarely" onchange="togglePhysicalDetails()"> Rarely</label>
+        <label><input type="checkbox" name="physical-frequency" value="not-at-all"> Not at all</label>
+      </div>
+      <div id="physical-details" style="display: none;">
+        <label>Type of physical activity:</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="physical-type" value="walking" onchange="togglePhysicalMinutes()"> Walking</label>
+          <label><input type="checkbox" name="physical-type" value="running" onchange="togglePhysicalMinutes()"> Running</label>
+          <label><input type="checkbox" name="physical-type" value="cardio" onchange="togglePhysicalMinutes()"> Cardio</label>
+          <label><input type="checkbox" name="physical-type" value="strength" onchange="togglePhysicalMinutes()"> Strength training</label>
+          <label><input type="checkbox" name="physical-type" value="stretching" onchange="togglePhysicalMinutes()"> Stretching</label>
+          <label><input type="checkbox" name="physical-type" value="other" onchange="togglePhysicalMinutes()"> Others</label>
+        </div>
+        <div id="physical-minutes" style="display: none;">
+          <label>Number of minutes: <input type="number" id="physical-minutes-val" min="0" placeholder="e.g., 30"></label>
+        </div>
+      </div>
+      <label>Summary: <textarea id="physical-activity" rows="4"></textarea></label>
+    </div>
+
+    <!-- Pertinent Personal and Family History -->
+    <div class="section clinical-history">
+      <h3>Pertinent Personal and Family History</h3>
+      <button onclick="toggleFamilyHistoryForm()">Add Family History Details</button>
+      <div id="family-history-form" style="display: none; margin-top: 15px;">
+        <!-- Father's Information -->
+        <h4>Father</h4>
+        <label>Status:
+          <select id="father-status" onchange="toggleFatherDetails()">
+            <option value="alive">Alive</option>
+            <option value="deceased">Deceased</option>
+          </select>
+        </label>
+        <div id="father-alive-details" style="display: block;">
+          <label>Current Age: <input type="number" id="father-age" min="0" placeholder="e.g., 65"></label>
+          <label>Any known health conditions? <textarea id="father-conditions" rows="2" placeholder="e.g., Hypertension, Diabetes"></textarea></label>
+        </div>
+        <div id="father-deceased-details" style="display: none;">
+          <label>Cause of Death: <input type="text" id="father-cause" placeholder="e.g., Heart Disease"></label>
+          <label>Age at Death: <input type="number" id="father-death-age" min="0" placeholder="e.g., 70"></label>
+        </div>
+
+        <!-- Mother's Information -->
+        <h4>Mother</h4>
+        <label>Status:
+          <select id="mother-status" onchange="toggleMotherDetails()">
+            <option value="alive">Alive</option>
+            <option value="deceased">Deceased</option>
+          </select>
+        </label>
+        <div id="mother-alive-details" style="display: block;">
+          <label>Current Age: <input type="number" id="mother-age" min="0" placeholder="e.g., 62"></label>
+          <label>Any known health conditions? <textarea id="mother-conditions" rows="2" placeholder="e.g., Arthritis"></textarea></label>
+        </div>
+        <div id="mother-deceased-details" style="display: none;">
+          <label>Cause of Death: <input type="text" id="mother-cause" placeholder="e.g., Cancer"></label>
+          <label>Age at Death: <input type="number" id="mother-death-age" min="0" placeholder="e.g., 68"></label>
+        </div>
+
+        <!-- Objective (Labs, Diagnostics, Imaging, Home Monitoring) -->
+        <h4>Objective (Labs, Diagnostics, Imaging, Home Monitoring)</h4>
+        <label>Do you monitor any of the following at home? (Select all that apply)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <label><input type="checkbox" name="home-monitoring" value="bp"> Blood Pressure</label>
+          <label><input type="checkbox" name="home-monitoring" value="glucose"> Blood Sugar (Glucose)</label>
+          <label><input type="checkbox" name="home-monitoring" value="weight"> Weight</label>
+          <label><input type="checkbox" name="home-monitoring" value="spo2"> Oxygen Saturation (SpO₂)</label>
+          <label><input type="checkbox" name="home-monitoring" value="hr"> Heart Rate</label>
+          <label><input type="checkbox" name="home-monitoring" value="temp"> Temperature</label>
+          <label><input type="checkbox" name="home-monitoring" value="other" onchange="toggleOtherMonitoring()"> Other</label>
+          <input type="text" id="other-monitoring" placeholder="Specify" style="display: none;">
+          <label><input type="checkbox" name="home-monitoring" value="none"> None</label>
+        </div>
+        <label>How often do you monitor your health at home?
+          <select id="monitoring-frequency">
+            <option value="">Select</option>
+            <option value="daily">Daily</option>
+            <option value="few-times-week">A few times per week</option>
+            <option value="occasionally">Occasionally</option>
+            <option value="rarely">Rarely</option>
+            <option value="never">Never</option>
+          </select>
+        </label>
+        <label>Do you use any devices or apps for home monitoring?
+          <select id="monitoring-devices" onchange="toggleDeviceSpecify()">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <div id="device-specify" style="display: none;">
+          <label>Please specify: <input type="text" id="device-details" placeholder="e.g., Fitbit, BP monitor"></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vaccinations/Preventative Care Hx -->
+    <div class="section monitoring">
+      <h3>Vaccinations/Preventative Care Hx</h3>
+      <button onclick="togglePreventativeCareForm()">Show/Hide Details</button>
+      <div id="preventative-care-form" style="display: none; margin-top: 15px;">
+        <div id="vaccinations-section">
+          <h4>Vaccinations</h4>
+          <div id="vac-rows">
+            <div class="row">
+              <input type="text" placeholder="Vaccine Name" class="vac-name">
+              <input type="date" placeholder="Date" class="vac-date">
+              <select class="vac-status">
+                <option value="completed">Completed</option>
+                <option value="Up To Date">Up To Date</option>
+              </select>
+              <button class="remove-btn" onclick="removeRow(this)">X</button>
+            </div>
+          </div>
+          <button onclick="addRow('vac')">Add Vaccination</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prescription Medications -->
+    <div class="section monitoring">
+      <h3>Prescription Medications</h3>
+      <div id="rx-rows">
+        <div class="row">
+          <input type="text" placeholder="Medication Name" class="rx-name" onchange="toggleRxDosageForm()">
+          <div class="rx-dosage-form" style="display: none;">
+            <select class="rx-dosage" onchange="toggleRxStrength()">
+              <option value="">Select Dosage Form</option>
+              <option value="tablet">Tablet</option>
+              <option value="capsule">Capsule</option>
+              <option value="syrup">Syrup</option>
+              <option value="suspension">Suspension</option>
+              <option value="inhaler">Inhaler</option>
+              <option value="suppository">Suppository</option>
+              <option value="injection">Injection</option>
+              <option value="cream">Cream</option>
+              <option value="gel">Gel</option>
+              <option value="patch">Patch</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="rx-strength" style="display: none;">
+              <input type="number" class="rx-strength-val" placeholder="Strength">
+              <select class="rx-strength-unit">
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="mcg">mcg</option>
+                <option value="mg/ml">mg/ml</option>
+              </select>
+            </div>
+          </div>
+          <input type="number" placeholder="Dose" class="rx-dose">
+          <select class="rx-frequency" onchange="toggleRxFrequencyOther()">
+            <option value="">Select Frequency</option>
+            <option value="OD">OD</option>
+            <option value="BID">BID</option>
+            <option value="TID">TID</option>
+            <option value="QID">QID</option>
+            <option value="Q4H">Q4H</option>
+            <option value="PRN">PRN</option>
+            <option value="Q6H">Q6H</option>
+            <option value="Q8H">Q8H</option>
+            <option value="Q12H">Q12H</option>
+            <option value="HS">HS</option>
+            <option value="morning">morning</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" placeholder="Other Frequency" class="rx-frequency-other" style="display: none;">
+          <select class="rx-adherence">
+            <option value="fully compliant">Fully Compliant</option>
+            <option value="partially compliant">Partially Compliant</option>
+            <option value="poorly compliant">Poorly Compliant</option>
+          </select>
+          <input type="text" placeholder="Indication" class="rx-indication">
+          <input type="text" placeholder="Duration (e.g., 1 year)" class="rx-duration">
+          <input type="text" placeholder="Side Effects" class="rx-side-effects">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+      <button onclick="addRow('rx')">Add Prescription Medication</button>
+    </div>
+
+    <!-- OTC Medications -->
+    <div class="section monitoring">
+      <h3>OTC Medications</h3>
+      <div id="otc-rows">
+        <div class="row">
+          <input type="text" placeholder="Medication Name" class="otc-name" onchange="toggleOtcDosageForm()">
+          <div class="otc-dosage-form" style="display: none;">
+            <select class="otc-dosage" onchange="toggleOtcStrength()">
+              <option value="">Select Dosage Form</option>
+              <option value="tablet">Tablet</option>
+              <option value="capsule">Capsule</option>
+              <option value="syrup">Syrup</option>
+              <option value="suspension">Suspension</option>
+              <option value="inhaler">Inhaler</option>
+              <option value="suppository">Suppository</option>
+              <option value="injection">Injection</option>
+              <option value="cream">Cream</option>
+              <option value="gel">Gel</option>
+              <option value="patch">Patch</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="otc-strength" style="display: none;">
+              <input type="number" class="otc-strength-val" placeholder="Strength">
+              <select class="otc-strength-unit">
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="mcg">mcg</option>
+                <option value="mg/ml">mg/ml</option>
+              </select>
+            </div>
+          </div>
+          <input type="number" placeholder="Dose" class="otc-dose">
+          <select class="otc-frequency" onchange="toggleOtcFrequencyOther()">
+            <option value="">Select Frequency</option>
+            <option value="OD">OD</option>
+            <option value="BID">BID</option>
+            <option value="TID">TID</option>
+            <option value="QID">QID</option>
+            <option value="Q4H">Q4H</option>
+            <option value="PRN">PRN</option>
+            <option value="Q6H">Q6H</option>
+            <option value="Q8H">Q8H</option>
+            <option value="Q12H">Q12H</option>
+            <option value="HS">HS</option>
+            <option value="morning">morning</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" placeholder="Other Frequency" class="otc-frequency-other" style="display: none;">
+          <select class="otc-adherence">
+            <option value="fully compliant">Fully Compliant</option>
+            <option value="partially compliant">Partially Compliant</option>
+            <option value="poorly compliant">Poorly Compliant</option>
+          </select>
+          <input type="text" placeholder="Indication" class="otc-indication">
+          <input type="text" placeholder="Duration (e.g., 1 year)" class="otc-duration">
+          <input type="text" placeholder="Side Effects" class="otc-side-effects">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+      <button onclick="addRow('otc')">Add OTC Medication</button>
+    </div>
+
+    <!-- Drug or Food Allergy/Intolerance -->
+    <div class="section monitoring">
+      <h3>Drug or Food Allergy/Intolerance</h3>
+      <div id="allergy-rows">
+        <div class="row">
+          <input type="text" placeholder="Drug/Food Name" class="allergy-name">
+          <input type="text" placeholder="Reaction (e.g., rash)" class="allergy-reaction">
+          <input type="text" placeholder="Discovered (e.g., 2 years ago)" class="allergy-discovered">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+      <button onclick="addRow('allergy')">Add Allergy/Intolerance</button>
+    </div>
+
+    <!-- Additional Notes -->
+    <div class="section monitoring">
+      <h3>Additional Notes</h3>
+      <div id="notes-rows">
+        <div class="row" style="display: flex; gap: 15px; align-items: flex-start;">
+          <label style="flex: 1;">Problem: 
+            <textarea id="problem-1" rows="2" placeholder="Paste or type problem details here"></textarea>
+          </label>
+          <label style="flex: 3;">Assessment: 
+            <textarea id="assessment-1" rows="6" placeholder="Paste or type assessment details here"></textarea>
+          </label>
+          <label style="flex: 2;">Plan: 
+            <textarea id="plan-1" rows="4" placeholder="Paste or type plan details here"></textarea>
+          </label>
+          <button class="remove-btn" onclick="removeNotesRow(this)">X</button>
+        </div>
+      </div>
+      <button onclick="addNotesRow()">Add Additional Notes Row</button>
+    </div>
+
+    <button class="submit-btn" onclick="generateReports()">Submit</button>
+
+    <div class="output" id="clinical-notes-report"></div>
+    <div class="output" id="patient-encounter-brief"></div>
+  </div>
+
+  <script>
+    document.getElementById('height-unit').addEventListener('change', function() {
+      document.getElementById('ft-in-inputs').style.display = this.value === 'ft-in' ? 'block' : 'none';
+    });
+
+    document.getElementById('dob').addEventListener('change', function() {
+      const dob = this.value;
+      const age = dob ? calculateAge(dob) : 'Not calculated';
+      document.getElementById('calculated-age').textContent = age;
+      updateHPIPMH();
+    });
+
+    document.getElementById('patient-name').addEventListener('input', updateHPIPMH);
+    document.getElementById('chief-complaint').addEventListener('input', updateHPIPMH);
+    document.getElementById('gender').addEventListener('change', () => { updateHPIPMH(); updateSocialHistorySummary(); updateEatingHabitsSummary(); updatePhysicalActivitySummary(); });
+    document.getElementById('symptoms').addEventListener('input', updateHPIPMH);
+    document.getElementById('duration-symptoms').addEventListener('input', updateHPIPMH);
+    document.getElementById('pmh').addEventListener('input', updateHPIPMH);
+
+    document.querySelectorAll('input[name="home-monitoring"], #monitoring-frequency, #monitoring-devices, #device-details, input[name="mental-health"], input[name="mental-symptoms"], #sleep-hours, #smoking-years, #quit-duration, input[name="living-situation"], #living-else, #children, #alcohol-use, #substances-use, #weight-appetite-change, #appetite, #fluid-amount-num, #fluid-unit, input[name="fluid-type"], #caffeine-amount-num, #caffeine-unit, input[name="physical-frequency"], input[name="physical-type"], #physical-minutes-val').forEach(el => {
+      el.addEventListener('change', () => {
+        updateSocialHistorySummary();
+        updateEatingHabitsSummary();
+        updatePhysicalActivitySummary();
+      });
+    });
+
+    window.onload = function() {
+      updateHPIPMH();
+      updateSocialHistorySummary();
+      updateEatingHabitsSummary();
+      updatePhysicalActivitySummary();
+    };
+
+    function updateHPIPMH() {
+      const name = document.getElementById('patient-name').value || '[Patient name]';
+      const dob = document.getElementById('dob').value;
+      const age = dob ? calculateAge(dob) : '[age]';
+      const chiefComplaint = document.getElementById('chief-complaint').value || '[chief complaint]';
+      const gender = document.getElementById('gender').value || '[gender]';
+      const symptoms = document.getElementById('symptoms').value || '[Symptoms input]';
+      const durationSymptoms = document.getElementById('duration-symptoms').value || '[duration of symptoms]';
+      const pmh = document.getElementById('pmh').value || '[Past medical history]';
+      
+      const pmhText = pmh ? `The patient reports a prior history of ${pmh.split('|')[0] || pmh} for about ${pmh.split('|')[1] || 'a year'}.` : '[Past medical history]';
+      const defaultText = `${name} is a ${age}-year-old ${gender} who was referred to the pharmacist for management of ${chiefComplaint}. The patient experiencing symptoms such as ${symptoms}. The symptoms have been present for approximately ${durationSymptoms}. ${pmhText}`;
+      
+      document.getElementById('hpi-pmh').value = defaultText;
+    }
+
+    function updateSocialHistorySummary() {
+      const gender = document.getElementById('gender').value || 'other';
+      const pronoun = gender === 'male' ? 'he' : gender === 'female' ? 'she' : 'they';
+      const possessive = gender === 'male' ? 'his' : gender === 'female' ? 'her' : 'their';
+      let summary = [];
+
+      const mentalHealth = Array.from(document.querySelectorAll('input[name="mental-health"]:checked')).map(cb => cb.value);
+      const mentalSymptoms = Array.from(document.querySelectorAll('input[name="mental-symptoms"]:checked')).map(cb => cb.value);
+      const sleepHours = document.getElementById('sleep-hours').value;
+      if (mentalHealth.length) summary.push(`The patient rates ${possessive} mental health as ${mentalHealth.join(', ')}.`);
+      if (mentalSymptoms.includes('none')) summary.push(`No significant mental health symptoms reported.`);
+      else if (mentalSymptoms.length) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} reports ${mentalSymptoms.map(s => s.replace('-', ' ')).join(', ')}.`);
+      if (sleepHours) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} sleeps ${sleepHours} hours daily.`);
+
+      const smokingStatus = document.getElementById('smoking-status').value;
+      const cigarettesDaily = document.getElementById('cigarettes-daily').value;
+      const smokingYears = document.getElementById('smoking-years').value;
+      const quitDuration = document.getElementById('quit-duration').value;
+      if (smokingStatus === 'never') summary.push(`The patient is a non-smoker.`);
+      else if (smokingStatus === 'smoker' && cigarettesDaily && smokingYears) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} smokes ${cigarettesDaily} cigarettes daily for ${smokingYears} years.`);
+      else if (smokingStatus === 'ex-smoker' && quitDuration) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} is an ex-smoker, having quit ${quitDuration} ago.`);
+
+      const maritalStatus = document.getElementById('marital-status').value;
+      const livingSituation = Array.from(document.querySelectorAll('input[name="living-situation"]:checked')).map(cb => cb.value === 'else' ? document.getElementById('living-else').value : cb.value);
+      const children = document.getElementById('children').value;
+      if (maritalStatus) summary.push(`The patient is ${maritalStatus}${livingSituation.length ? ` and lives ${livingSituation.join(', ')}` : ''}${children ? ` with ${children} child${children === '1' ? '' : 'ren'}` : ''}.`);
+
+      const alcoholUse = document.getElementById('alcohol-use').value;
+      const alcRows = document.querySelectorAll('#alc-rows .row');
+      const alcohols = alcoholUse === 'yes' ? Array.from(alcRows).map(row => ({
+        type: row.querySelector('.alc-type').value,
+        amount: row.querySelector('.alc-amount').value,
+        unit: row.querySelector('.alc-unit').value,
+        frequency: row.querySelector('.alc-frequency').value
+      })).filter(a => a.type) : [];
+      if (alcoholUse === 'no') summary.push(`The patient reports ${pronoun} does not drink alcohol.`);
+      else if (alcohols.length) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} drinks ${alcohols.map(a => `${a.amount} ${a.unit} of ${a.type} ${a.frequency}`).join(', ')}.`);
+
+      const substancesUse = document.getElementById('substances-use').value;
+      const subRows = document.querySelectorAll('#sub-rows .row');
+      const substances = substancesUse === 'yes' ? Array.from(subRows).map(row => row.querySelector('.sub-name').value).filter(s => s) : [];
+      if (substancesUse === 'no') summary.push(`The patient reports ${pronoun} does not use recreational substances.`);
+      else if (substances.length) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} uses ${substances.join(', ')}.`);
+
+      document.getElementById('social-history-summary').value = summary.join(' ');
+    }
+
+    function updateEatingHabitsSummary() {
+      const gender = document.getElementById('gender').value || 'other';
+      const pronoun = gender === 'male' ? 'he' : gender === 'female' ? 'she' : 'they';
+      const possessive = gender === 'male' ? 'his' : gender === 'female' ? 'her' : 'their';
+      let summary = [];
+
+      const mealsPerDay = document.getElementById('meals-per-day').value;
+      const skipMeals = document.getElementById('skip-meals').value;
+      if (mealsPerDay && skipMeals) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} eats ${mealsPerDay} meals per day and ${skipMeals === 'yes' ? 'frequently skips meals' : 'does not frequently skip meals'}.`);
+
+      const mealComp = Array.from(document.querySelectorAll('input[name="meal-comp"]:checked')).map(cb => cb.value);
+      const specialDietText = document.getElementById('special-diet-text').value;
+      if (mealComp.length) summary.push(`${possessive.charAt(0).toUpperCase() + possessive.slice(1)} typical meals are ${mealComp.join(', ')}${specialDietText ? ` (${specialDietText})` : ''}.`);
+
+      const weightAppetiteChange = document.getElementById('weight-appetite-change').value;
+      const appetite = document.getElementById('appetite').value;
+      if (weightAppetiteChange === 'no') summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} reports no change in weight or appetite.`);
+      else if (weightAppetiteChange === 'yes' && appetite) summary.push(`${possessive.charAt(0).toUpperCase() + possessive.slice(1)} current appetite is ${appetite}.`);
+
+      const fluidAmount = document.getElementById('fluid-amount-num').value;
+      const fluidUnit = document.getElementById('fluid-unit').value;
+      const fluidTypes = Array.from(document.querySelectorAll('input[name="fluid-type"]:checked')).map(cb => cb.value);
+      if (fluidAmount && fluidUnit && fluidTypes.length) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} drinks ${fluidAmount} ${fluidUnit} of mostly ${fluidTypes.join(', ')} daily.`);
+
+      const caffeineUse = document.getElementById('caffeine-use').value;
+      const caffeineTypes = caffeineUse === 'yes' ? Array.from(document.querySelectorAll('input[name="caffeine-type"]:checked')).map(cb => cb.value) : [];
+      const caffeineAmount = document.getElementById('caffeine-amount-num').value;
+      const caffeineUnit = document.getElementById('caffeine-unit').value;
+      const caffeineSymptoms = Array.from(document.querySelectorAll('input[name="caffeine-symptom"]:checked')).map(cb => cb.value);
+      if (caffeineUse === 'no') summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} does not consume caffeine regularly.`);
+      else if (caffeineUse === 'yes' && caffeineTypes.length && caffeineAmount && caffeineUnit) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} consumes ${caffeineAmount} ${caffeineUnit} of ${caffeineTypes.join(', ')} daily${caffeineSymptoms.length ? `, reporting ${caffeineSymptoms.join(', ')}` : ''}.`);
+
+      document.getElementById('eating-habits-summary').value = summary.join(' ');
+    }
+
+    function updatePhysicalActivitySummary() {
+      const gender = document.getElementById('gender').value || 'other';
+      const pronoun = gender === 'male' ? 'he' : gender === 'female' ? 'she' : 'they';
+      let summary = [];
+
+      const frequency = Array.from(document.querySelectorAll('input[name="physical-frequency"]:checked')).map(cb => cb.value);
+      const types = Array.from(document.querySelectorAll('input[name="physical-type"]:checked')).map(cb => cb.value);
+      const minutes = document.getElementById('physical-minutes-val').value;
+
+      if (frequency.includes('not-at-all')) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} does not engage in physical activity.`);
+      else if (frequency.length) summary.push(`${pronoun.charAt(0).toUpperCase() + pronoun.slice(1)} engages in physical activity ${frequency.join(', ')}${types.length ? ` (${types.join(', ')})` : ''}${minutes ? ` for ${minutes} minutes` : ''}.`);
+
+      document.getElementById('physical-activity').value = summary.join(' ');
+    }
+
+    function addRow(type) {
+      const container = document.getElementById(`${type}-rows`);
+      const newRow = document.createElement('div');
+      newRow.className = 'row';
+      if (type === 'vac') {
+        newRow.innerHTML = `
+          <input type="text" placeholder="Vaccine Name" class="vac-name">
+          <input type="date" placeholder="Date" class="vac-date">
+          <select class="vac-status">
+            <option value="completed">Completed</option>
+            <option value="Up To Date">Up To Date</option>
+          </select>
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      } else if (type === 'alc') {
+        newRow.innerHTML = `
+          <input type="text" W placeholder="Alcohol Type (e.g., Beer)" class="alc-type">
+          <input type="number" placeholder="Number" class="alc-amount">
+          <select class="alc-unit">
+            <option value="glasses">Glasses</option>
+            <option value="cups">Cups</option>
+          </select>
+          <input type="text" placeholder="Frequency (e.g., daily)" class="alc-frequency" list="frequency-options">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      } else if (type === 'sub') {
+        newRow.innerHTML = `
+          <input type="text" placeholder="Substance Name" class="sub-name">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      } else if (type === 'rx') {
+        newRow.innerHTML = `
+          <input type="text" placeholder="Medication Name" class="rx-name" onchange="toggleRxDosageForm()">
+          <div class="rx-dosage-form" style="display: none;">
+            <select class="rx-dosage" onchange="toggleRxStrength()">
+              <option value="">Select Dosage Form</option>
+              <option value="tablet">Tablet</option>
+              <option value="capsule">Capsule</option>
+              <option value="syrup">Syrup</option>
+              <option value="suspension">Suspension</option>
+              <option value="inhaler">Inhaler</option>
+              <option value="suppository">Suppository</option>
+              <option value="injection">Injection</option>
+              <option value="cream">Cream</option>
+              <option value="gel">Gel</option>
+              <option value="patch">Patch</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="rx-strength" style="display: none;">
+              <input type="number" class="rx-strength-val" placeholder="Strength">
+              <select class="rx-strength-unit">
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="mcg">mcg</option>
+                <option value="mg/ml">mg/ml</option>
+              </select>
+            </div>
+          </div>
+          <input type="number" placeholder="Dose" class="rx-dose">
+          <select class="rx-frequency" onchange="toggleRxFrequencyOther()">
+            <option value="">Select Frequency</option>
+            <option value="OD">OD</option>
+            <option value="BID">BID</option>
+            <option value="TID">TID</option>
+            <option value="QID">QID</option>
+            <option value="Q4H">Q4H</option>
+            <option value="PRN">PRN</option>
+            <option value="Q6H">Q6H</option>
+            <option value="Q8H">Q8H</option>
+            <option value="Q12H">Q12H</option>
+            <option value="HS">HS</option>
+            <option value="morning">morning</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" placeholder="Other Frequency" class="rx-frequency-other" style="display: none;">
+          <select class="rx-adherence">
+            <option value="fully compliant">Fully Compliant</option>
+            <option value="partially compliant">Partially Compliant</option>
+            <option value="poorly compliant">Poorly Compliant</option>
+          </select>
+          <input type="text" placeholder="Indication" class="rx-indication">
+          <input type="text" placeholder="Duration (e.g., 1 year)" class="rx-duration">
+          <input type="text" placeholder="Side Effects" class="rx-side-effects">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      } else if (type === 'otc') {
+        newRow.innerHTML = `
+          <input type="text" placeholder="Medication Name" class="otc-name" onchange="toggleOtcDosageForm()">
+          <div class="otc-dosage-form" style="display: none;">
+            <select class="otc-dosage" onchange="toggleOtcStrength()">
+              <option value="">Select Dosage Form</option>
+              <option value="tablet">Tablet</option>
+              <option value="capsule">Capsule</option>
+              <option value="syrup">Syrup</option>
+              <option value="suspension">Suspension</option>
+              <option value="inhaler">Inhaler</option>
+              <option value="suppository">Suppository</option>
+              <option value="injection">Injection</option>
+              <option value="cream">Cream</option>
+              <option value="gel">Gel</option>
+              <option value="patch">Patch</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="otc-strength" style="display: none;">
+              <input type="number" class="otc-strength-val" placeholder="Strength">
+              <select class="otc-strength-unit">
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="mcg">mcg</option>
+                <option value="mg/ml">mg/ml</option>
+              </select>
+            </div>
+          </div>
+          <input type="number" placeholder="Dose" class="otc-dose">
+          <select class="otc-frequency" onchange="toggleOtcFrequencyOther()">
+            <option value="">Select Frequency</option>
+            <option value="OD">OD</option>
+            <option value="BID">BID</option>
+            <option value="TID">TID</option>
+            <option value="QID">QID</option>
+            <option value="Q4H">Q4H</option>
+            <option value="PRN">PRN</option>
+            <option value="Q6H">Q6H</option>
+            <option value="Q8H">Q8H</option>
+            <option value="Q12H">Q12H</option>
+            <option value="HS">HS</option>
+            <option value="morning">morning</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" placeholder="Other Frequency" class="otc-frequency-other" style="display: none;">
+          <select class="otc-adherence">
+            <option value="fully compliant">Fully Compliant</option>
+            <option value="partially compliant">Partially Compliant</option>
+            <option value="poorly compliant">Poorly Compliant</option>
+          </select>
+          <input type="text" placeholder="Indication" class="otc-indication">
+          <input type="text" placeholder="Duration (e.g., 1 year)" class="otc-duration">
+          <input type="text" placeholder="Side Effects" class="otc-side-effects">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      } else if (type === 'allergy') {
+        newRow.innerHTML = `
+          <input type="text" placeholder="Drug/Food Name" class="allergy-name">
+          <input type="text" placeholder="Reaction (e.g., rash)" class="allergy-reaction">
+          <input type="text" placeholder="Discovered (e.g., 2 years ago)" class="allergy-discovered">
+          <button class="remove-btn" onclick="removeRow(this)">X</button>
+        `;
+      }
+      container.appendChild(newRow);
+      if (type === 'alc' || type === 'sub') updateSocialHistorySummary();
+    }
+
+    function removeRow(button) {
+      button.parentElement.remove();
+      updateSocialHistorySummary();
+    }
+
+    function addNotesRow() {
+      const container = document.getElementById('notes-rows');
+      const rowCount = container.children.length + 1;
+      const newRow = document.createElement('div');
+      newRow.className = 'row';
+      newRow.style.display = 'flex';
+      newRow.style.gap = '15px';
+      newRow.style.alignItems = 'flex-start';
+      newRow.innerHTML = `
+        <label style="flex: 1;">Problem: 
+          <textarea id="problem-${rowCount}" rows="2" placeholder="Paste or type problem details here"></textarea>
+        </label>
+        <label style="flex: 3;">Assessment: 
+          <textarea id="assessment-${rowCount}" rows="6" placeholder="Paste or type assessment details here"></textarea>
+        </label>
+        <label style="flex: 2;">Plan: 
+          <textarea id="plan-${rowCount}" rows="4" placeholder="Paste or type plan details here"></textarea>
+        </label>
+        <button class="remove-btn" onclick="removeNotesRow(this)">X</button>
+      `;
+      container.appendChild(newRow);
+    }
+
+    function removeNotesRow(button) {
+      const rows = document.getElementById('notes-rows').children.length;
+      if (rows > 1) {
+        button.parentElement.remove();
+      }
+    }
+
+    function toggleMentalHealthForm() {
+      const form = document.getElementById('mental-health-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleSmokingForm() {
+      const form = document.getElementById('smoking-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleSmokingDetails() {
+      const status = document.getElementById('smoking-status').value;
+      document.getElementById('smoker-details').style.display = status === 'smoker' ? 'block' : 'none';
+      document.getElementById('ex-smoker-details').style.display = status === 'ex-smoker' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleMaritalStatusForm() {
+      const form = document.getElementById('marital-status-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleSubstancesForm() {
+      const form = document.getElementById('substances-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleAlcoholRows() {
+      const use = document.getElementById('alcohol-use').value;
+      document.getElementById('alc-rows').style.display = use === 'yes' ? 'block' : 'none';
+      document.getElementById('add-alcohol-btn').style.display = use === 'yes' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleSubstanceRows() {
+      const use = document.getElementById('substances-use').value;
+      document.getElementById('sub-rows').style.display = use === 'yes' ? 'block' : 'none';
+      document.getElementById('add-substance-btn').style.display = use === 'yes' ? 'block' : 'none';
+      updateSocialHistorySummary();
+    }
+
+    function toggleSpecialDiet() {
+      const checkbox = document.querySelector('input[value="special-diet"]');
+      document.getElementById('special-diet-text').style.display = checkbox.checked ? 'block' : 'none';
+      updateEatingHabitsSummary();
+    }
+
+    function toggleCaffeineDetails() {
+      const use = document.getElementById('caffeine-use').value;
+      document.getElementById('caffeine-details').style.display = use === 'yes' ? 'block' : 'none';
+      updateEatingHabitsSummary();
+    }
+
+    function toggleCaffeineAmount() {
+      document.getElementById('caffeine-amount-section').style.display = document.querySelectorAll('input[name="caffeine-type"]:checked').length > 0 ? 'block' : 'none';
+      updateEatingHabitsSummary();
+    }
+
+    function toggleFamilyHistoryForm() {
+      const form = document.getElementById('family-history-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleFatherDetails() {
+      const status = document.getElementById('father-status').value;
+      document.getElementById('father-alive-details').style.display = status === 'alive' ? 'block' : 'none';
+      document.getElementById('father-deceased-details').style.display = status === 'deceased' ? 'block' : 'none';
+    }
+
+    function toggleMotherDetails() {
+      const status = document.getElementById('mother-status').value;
+      document.getElementById('mother-alive-details').style.display = status === 'alive' ? 'block' : 'none';
+      document.getElementById('mother-deceased-details').style.display = status === 'deceased' ? 'block' : 'none';
+    }
+
+    function togglePreventativeCareForm() {
+      const form = document.getElementById('preventative-care-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleOtherMonitoring() {
+      document.getElementById('other-monitoring').style.display = document.querySelector('input[value="other"][name="home-monitoring"]').checked ? 'block' : 'none';
+    }
+
+    function toggleDeviceSpecify() {
+      document.getElementById('device-specify').style.display = document.getElementById('monitoring-devices').value === 'yes' ? 'block' : 'none';
+    }
+
+    function toggleLivingElse() {
+      document.getElementById('living-else').style.display = document.querySelector('input[value="else"][name="living-situation"]').checked ? 'block' : 'none';
+    }
+
+    function toggleAppetiteQuestion() {
+      document.getElementById('appetite-question').style.display = document.getElementById('weight-appetite-change').value === 'yes' ? 'block' : 'none';
+      updateEatingHabitsSummary();
+    }
+
+    function togglePhysicalDetails() {
+      const checked = document.querySelectorAll('input[name="physical-frequency"]:checked:not([value="not-at-all"])').length > 0;
+      document.getElementById('physical-details').style.display = checked ? 'block' : 'none';
+      updatePhysicalActivitySummary();
+    }
+
+    function togglePhysicalMinutes() {
+      document.getElementById('physical-minutes').style.display = document.querySelectorAll('input[name="physical-type"]:checked').length > 0 ? 'block' : 'none';
+      updatePhysicalActivitySummary();
+    }
+
+    function toggleRxDosageForm() {
+      const rows = document.querySelectorAll('#rx-rows .row');
+      rows.forEach(row => {
+        const name = row.querySelector('.rx-name').value;
+        row.querySelector('.rx-dosage-form').style.display = name ? 'block' : 'none';
+      });
+    }
+
+    function toggleRxStrength() {
+      const rows = document.querySelectorAll('#rx-rows .row');
+      rows.forEach(row => {
+        const dosage = row.querySelector('.rx-dosage').value;
+        row.querySelector('.rx-strength').style.display = dosage ? 'block' : 'none';
+      });
+    }
+
+    function toggleRxFrequencyOther() {
+      const rows = document.querySelectorAll('#rx-rows .row');
+      rows.forEach(row => {
+        const frequency = row.querySelector('.rx-frequency').value;
+        row.querySelector('.rx-frequency-other').style.display = frequency === 'other' ? 'block' : 'none';
+      });
+    }
+
+    function toggleOtcDosageForm() {
+      const rows = document.querySelectorAll('#otc-rows .row');
+      rows.forEach(row => {
+        const name = row.querySelector('.otc-name').value;
+        row.querySelector('.otc-dosage-form').style.display = name ? 'block' : 'none';
+      });
+    }
+
+    function toggleOtcStrength() {
+      const rows = document.querySelectorAll('#otc-rows .row');
+      rows.forEach(row => {
+        const dosage = row.querySelector('.otc-dosage').value;
+        row.querySelector('.otc-strength').style.display = dosage ? 'block' : 'none';
+      });
+    }
+
+    function toggleOtcFrequencyOther() {
+      const rows = document.querySelectorAll('#otc-rows .row');
+      rows.forEach(row => {
+        const frequency = row.querySelector('.otc-frequency').value;
+        row.querySelector('.otc-frequency-other').style.display = frequency === 'other' ? 'block' : 'none';
+      });
+    }
+
+    function calculateAge(dob) {
+      const today = new Date('2025-04-01');
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+function generateReports() {
+      const name = document.getElementById('patient-name').value || 'Not provided';
+      const dob = document.getElementById('dob').value || 'Not provided';
+      const age = dob !== 'Not provided' ? calculateAge(dob) : 'Not calculated';
+      const chiefComplaint = document.getElementById('chief-complaint').value || 'Not provided';
+      const symptoms = document.getElementById('symptoms').value || 'Not provided';
+      const durationSymptoms = document.getElementById('duration-symptoms').value || 'Not provided';
+      const hpiPmh = document.getElementById('hpi-pmh').value || 'Not provided';
+      const socialHistory = document.getElementById('social-history-summary').value || 'Not provided';
+      const eatingHabits = document.getElementById('eating-habits-summary').value || 'Not provided';
+      const physicalActivity = document.getElementById('physical-activity').value || 'Not provided';
+      const gender = document.getElementById('gender').value || 'Not provided';
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      const weightUnit = document.getElementById('weight-unit').value || 'kg';
+      const heightVal = parseFloat(document.getElementById('height-val').value) || 0;
+      const heightUnit = document.getElementById('height-unit').value || 'cm';
+      const scr = parseFloat(document.getElementById('scr').value) || 0;
+
+      const fatherStatus = document.getElementById('father-status').value || 'Not provided';
+      const fatherAge = document.getElementById('father-age').value || 'Not provided';
+      const fatherConditions = document.getElementById('father-conditions').value || 'None reported';
+      const fatherCause = document.getElementById('father-cause').value || 'Not provided';
+      const fatherDeathAge = document.getElementById('father-death-age').value || 'Not provided';
+      const motherStatus = document.getElementById('mother-status').value || 'Not provided';
+      const motherAge = document.getElementById('mother-age').value || 'Not provided';
+      const motherConditions = document.getElementById('mother-conditions').value || 'None reported';
+      const motherCause = document.getElementById('mother-cause').value || 'Not provided';
+      const motherDeathAge = document.getElementById('mother-death-age').value || 'Not provided';
+
+      const homeMonitoring = Array.from(document.querySelectorAll('input[name="home-monitoring"]:checked')).map(cb => cb.value === 'other' ? document.getElementById('other-monitoring').value : cb.value);
+      const monitoringFrequency = document.getElementById('monitoring-frequency').value || 'Not provided';
+      const monitoringDevices = document.getElementById('monitoring-devices').value;
+      const deviceDetails = document.getElementById('device-details')?.value || 'Not provided';
+
+      const vacRows = document.querySelectorAll('#vac-rows .row');
+      const vaccinations = Array.from(vacRows).map(row => ({
+        name: row.querySelector('.vac-name').value || 'Not provided',
+        date: row.querySelector('.vac-date').value || 'Not provided',
+        status: row.querySelector('.vac-status').value
+      }));
+
+      const frequencyMap = {
+        'OD': 'Once daily',
+        'BID': 'Twice daily',
+        'TID': 'Three times daily',
+        'QID': 'Four times daily',
+        'Q4H': 'Every 4 hours',
+        'PRN': 'As needed',
+        'Q6H': 'Every 6 hours',
+        'Q8H': 'Every 8 hours',
+        'Q12H': 'Every 12 hours',
+        'HS': 'At bedtime',
+        'morning': 'In the morning',
+        'other': ''
+      };
+
+      const rxMedications = Array.from(document.querySelectorAll('#rx-rows .row')).map(row => ({
+        name: row.querySelector('.rx-name').value || 'Not provided',
+        dosage: row.querySelector('.rx-dosage').value || 'Not provided',
+        strengthVal: row.querySelector('.rx-strength-val')?.value || '',
+        strengthUnit: row.querySelector('.rx-strength-unit')?.value || '',
+        dose: row.querySelector('.rx-dose').value || 'Not provided',
+        frequency: row.querySelector('.rx-frequency').value === 'other' ? row.querySelector('.rx-frequency-other').value : frequencyMap[row.querySelector('.rx-frequency').value] || 'Not provided',
+        adherence: row.querySelector('.rx-adherence').value || 'Not provided',
+        indication: row.querySelector('.rx-indication').value || 'Not provided',
+        duration: row.querySelector('.rx-duration').value || 'Not provided',
+        sideEffects: row.querySelector('.rx-side-effects').value || 'None reported'
+      }));
+
+      const otcMedications = Array.from(document.querySelectorAll('#otc-rows .row')).map(row => ({
+        name: row.querySelector('.otc-name').value || 'Not provided',
+        dosage: row.querySelector('.otc-dosage').value || 'Not provided',
+        strengthVal: row.querySelector('.otc-strength-val')?.value || '',
+        strengthUnit: row.querySelector('.otc-strength-unit')?.value || '',
+        dose: row.querySelector('.otc-dose').value || 'Not provided',
+        frequency: row.querySelector('.otc-frequency').value === 'other' ? row.querySelector('.otc-frequency-other').value : frequencyMap[row.querySelector('.otc-frequency').value] || 'Not provided',
+        adherence: row.querySelector('.otc-adherence').value || 'Not provided',
+        indication: row.querySelector('.otc-indication').value || 'Not provided',
+        duration: row.querySelector('.otc-duration').value || 'Not provided',
+        sideEffects: row.querySelector('.otc-side-effects').value || 'None reported'
+      }));
+
+      const allergyRows = document.querySelectorAll('#allergy-rows .row');
+      const allergies = Array.from(allergyRows).map(row => ({
+        name: row.querySelector('.allergy-name').value || 'Not provided',
+        reaction: row.querySelector('.allergy-reaction').value || 'Not provided',
+        discovered: row.querySelector('.allergy-discovered').value || 'Not provided'
+      }));
+
+      const notesRows = document.querySelectorAll('#notes-rows .row');
+      const notesData = Array.from(notesRows).map((row, index) => ({
+        problem: row.querySelector(`#problem-${index + 1}`).value || 'Not provided',
+        assessment: row.querySelector(`#assessment-${index + 1}`).value || 'Not provided',
+        plan: row.querySelector(`#plan-${index + 1}`).value || 'Not provided'
+      }));
+
+      const weightKg = weightUnit === 'lb' ? weight * 0.453592 : weight;
+      let heightCm, heightInches;
+      if (heightUnit === 'cm') {
+        heightCm = heightVal;
+        heightInches = heightVal / 2.54;
+      } else if (heightUnit === 'inches') {
+        heightInches = heightVal;
+        heightCm = heightInches * 2.54;
+      } else {
+        const feet = parseFloat(document.getElementById('feet').value) || 0;
+        const inches = parseFloat(document.getElementById('inches').value) || 0;
+        heightInches = feet * 12 + inches;
+        heightCm = heightInches * 2.54;
+      }
+      const heightM = heightCm / 100;
+      const bmi = heightM > 0 ? weightKg / (heightM * heightM) : 0;
+      const bmiStatus = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
+      const ibw = gender === 'male' ? 50 + 2.3 * (heightInches - 60) : 45.5 + 2.3 * (heightInches - 60);
+      const adjbw = ibw + 0.4 * (weightKg - ibw);
+      const usedWeight = bmiStatus === 'Normal' ? ibw : (bmiStatus === 'Overweight' || bmiStatus === 'Obese') && weightKg > 1.2 * ibw ? adjbw : weightKg;
+      const crcl = scr > 0 ? ((140 - age) * usedWeight * (gender === 'female' ? 0.85 : 1)) / (72 * scr) : 0;
+      const kappa = gender === 'female' ? 0.7 : 0.9;
+      const alpha = gender === 'female' ? -0.241 : -0.302;
+      const sexFactor = gender === 'female' ? 1.012 : 1.000;
+      const minScr = scr > 0 ? Math.min(scr / kappa, 1) : 0;
+      const maxScr = scr > 0 ? Math.max(scr / kappa, 1) : 0;
+      const egfr = scr > 0 ? 142 * Math.pow(minScr, alpha) * Math.pow(maxScr, -1.200) * Math.pow(0.9938, age) * sexFactor : 0;
+      const ckdStage = egfr >= 90 ? '1 (Normal with damage)' : 
+                      egfr >= 60 ? '2 (Mild GFR)' : 
+                      egfr >= 45 ? '3a (Moderate)' : 
+                      egfr >= 30 ? '3b (Moderate)' : 
+                      egfr >= 15 ? '4 (Severe)' : 
+                      '5 (Kidney failure)';
+
+      const fatherSummary = fatherStatus === 'alive' 
+        ? `Father: Alive, Age: ${fatherAge}, Conditions: ${fatherConditions}`
+        : `Father: Deceased, Cause: ${fatherCause}, Age at Death: ${fatherDeathAge}`;
+      const motherSummary = motherStatus === 'alive' 
+        ? `Mother: Alive, Age: ${motherAge}, Conditions: ${motherConditions}`
+        : `Mother: Deceased, Cause: ${motherCause}, Age at Death: ${motherDeathAge}`;
+
+      const monitoringSummary = homeMonitoring.length ? `Monitors: ${homeMonitoring.join(', ')}; Frequency: ${monitoringFrequency}; Devices: ${monitoringDevices === 'yes' ? deviceDetails : 'None'}` : 'No home monitoring reported';
+      const vacSummary = vaccinations.length ? vaccinations.map(v => `${v.name} ${v.status === 'Up To Date' ? 'is up to date' : `on ${v.date}`}`).join('<br>') : 'Not provided';
+      const rxSummary = rxMedications.length ? rxMedications.map(m => {
+        const strength = m.strengthVal && m.strengthUnit ? `${m.strengthVal} ${m.strengthUnit}` : '';
+        const doseUnit = m.dosage === 'inhaler' ? 'puffs' : 'units';
+        return `The patient uses ${m.name} (${m.dosage}${strength ? `, ${strength}` : ''}) for ${m.indication} with a dose of ${m.dose} ${doseUnit}, ${m.frequency}, and ${m.adherence}. Duration: ${m.duration}. Side Effects: ${m.sideEffects}.`;
+      }).join('<br>') : 'None reported';
+      const otcSummary = otcMedications.length ? otcMedications.map(m => {
+        const strength = m.strengthVal && m.strengthUnit ? `${m.strengthVal} ${m.strengthUnit}` : '';
+        const doseUnit = m.dosage === 'inhaler' ? 'puffs' : 'units';
+        return `The patient uses ${m.name} (${m.dosage}${strength ? `, ${strength}` : ''}) for ${m.indication} with a dose of ${m.dose} ${doseUnit}, ${m.frequency}, and ${m.adherence}. Duration: ${m.duration}. Side Effects: ${m.sideEffects}.`;
+      }).join('<br>') : 'None reported';
+      const allergySummary = allergies.length ? allergies.map(a => 
+        `Patient reports an allergy to ${a.name}, resulting in ${a.reaction}, identified ${a.discovered}.`
+      ).join('<br>') : 'None reported';
+
+      const notesTableHTML = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background: #3498db; color: white;">
+              <th style="padding: 8px; border: 1px solid #ddd;">Problem</th>
+              <th style="padding: 8px; border: 1px solid #ddd;">Assessment</th>
+              <th style="padding: 8px; border: 1px solid #ddd;">Plan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${notesData.map(row => `
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">${row.problem}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${row.assessment}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${row.plan}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      const clinicalNotesHTML = `
+        <h2>Clinical Notes Report</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Date of Birth:</strong> ${dob} (Age: ${age})</p>
+        <p><strong>Chief Complaint:</strong> ${chiefComplaint}</p>
+        <p><strong>Symptoms:</strong> ${symptoms}</p>
+        <p><strong>Duration of Symptoms:</strong> ${durationSymptoms}</p>
+        <p><strong>HPI & PMH:</strong> ${hpiPmh}</p>
+        <p><strong>Pertinent Family History:</strong> ${fatherSummary}; ${motherSummary}</p>
+        <p><strong>SH and pertinent lifestyle:</strong> ${socialHistory}</p>
+        <p><strong>Eating Habits:</strong> ${eatingHabits}</p>
+        <p><strong>Physical Activity:</strong> ${physicalActivity}</p>
+        <p><strong>Home Monitoring:</strong> ${monitoringSummary}</p>
+        <p><strong>Vaccinations:</strong> ${vacSummary}</p>
+        <p><strong>Prescription Medications:</strong> ${rxSummary}</p>
+        <p><strong>OTC Medications:</strong> ${otcSummary}</p>
+        <p><strong>Allergies/Intolerances:</strong> ${allergySummary}</p>
+        <p><strong>Additional Notes:</strong></p>
+        ${notesTableHTML}
+      `;
+      document.getElementById('clinical-notes-report').innerHTML = clinicalNotesHTML;
+
+      const demographics = `${name}, DOB: ${dob} (Age: ${age}), Gender: ${gender}, ${heightCm.toFixed(1)} cm, ${weightKg.toFixed(1)} kg (${bmi.toFixed(1)} BMI - ${bmiStatus})`;
+      const situation = chiefComplaint !== 'Not provided' ? `Patient presented with: ${chiefComplaint}` : 'No specific complaints noted';
+      const background = hpiPmh !== 'Not provided' ? `${hpiPmh}` : `No history provided.`;
+      const familyHistoryBrief = `Family History: ${fatherSummary}; ${motherSummary}`;
+      const preventativeCareBrief = `Home Monitoring: ${monitoringSummary}; Vaccinations: ${vacSummary}`;
+      const communication = `Explained findings and plan to patient in clear terms, addressing ${chiefComplaint !== 'Not provided' ? chiefComplaint : 'general health status'}.`;
+      const rationale = `Plan based on renal function (Stage ${ckdStage} CKD) and BMI (${bmiStatus}). Lifestyle modifications recommended based on ${monitoringSummary !== 'No home monitoring reported' ? 'home monitoring data' : 'general health'}.`;
+
+      const encounterHTML = `
+        <h2>Patient Encounter Brief</h2>
+        <p><strong>Gave demographics:</strong> ${demographics}</p>
+        <p><strong>Situation clearly explained:</strong> ${situation}</p>
+        <p><strong>Background provided:</strong> ${background}</p>
+        <p><strong>Family History:</strong> ${familyHistoryBrief}</p>
+        <p><strong>Social History:</strong> ${socialHistory}</p>
+        <p><strong>Eating Habits:</strong> ${eatingHabits}</p>
+        <p><strong>Preventative Care:</strong> ${preventativeCareBrief}</p>
+        <p><strong>Additional Notes:</strong></p>
+        ${notesTableHTML}
+        <p><strong>Communicated clearly:</strong> ${communication}</p>
+        <p><strong>Supported plan with rationale:</strong> ${rationale}</p>
+      `;
+      document.getElementById('patient-encounter-brief').innerHTML = encounterHTML;
+    }
+  </script>
+</body>
+</html>
+
+
